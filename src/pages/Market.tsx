@@ -13,16 +13,28 @@ export default function Market() {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [holdings, setHoldings] = useState<UserStock[]>([]);
   const [histories, setHistories] = useState<Record<string, PriceHistory[]>>({});
+  const [issuedMap, setIssuedMap] = useState<Record<string, number>>({});
   const [modal, setModal] = useState<ModalState>(null);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [flashMap, setFlashMap] = useState<Record<string, 'gain' | 'loss'>>({});
 
+  // Fetch real issued shares from user_stocks (sum of all shares owned per stock)
+  const fetchIssuedShares = useCallback(async () => {
+    const { data } = await supabase.from('user_stocks').select('stock_id, shares_owned');
+    if (data) {
+      const map: Record<string, number> = {};
+      data.forEach(row => {
+        map[row.stock_id] = (map[row.stock_id] ?? 0) + row.shares_owned;
+      });
+      setIssuedMap(map);
+    }
+  }, []);
+
   const fetchStocks = useCallback(async () => {
     const { data } = await supabase.from('stocks').select('*').order('name');
     if (data) {
       setStocks(prev => {
-        // Detect price changes for flash animation
         const newFlash: Record<string, 'gain' | 'loss'> = {};
         data.forEach(s => {
           const old = prev.find(p => p.id === s.id);
@@ -37,7 +49,8 @@ export default function Market() {
         return data;
       });
     }
-  }, []);
+    await fetchIssuedShares();
+  }, [fetchIssuedShares]);
 
   const fetchHoldings = useCallback(async () => {
     if (!profile) return;
@@ -85,9 +98,10 @@ export default function Market() {
     const sub = supabase
       .channel('market-stocks')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'stocks' }, fetchStocks)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_stocks' }, fetchIssuedShares)
       .subscribe();
     return () => { supabase.removeChannel(sub); };
-  }, [fetchStocks]);
+  }, [fetchStocks, fetchIssuedShares]);
 
   const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
   const pctChange = (s: Stock) => ((s.current_price - s.initial_price) / s.initial_price * 100);
@@ -172,7 +186,8 @@ export default function Market() {
             const holding = holdings.find(h => h.stock_id === stock.id);
             const history = histories[stock.id] ?? [];
             const flash = flashMap[stock.id];
-            const available = stock.max_shares - stock.issued_shares;
+            const realIssued = issuedMap[stock.id] ?? 0;
+            const available = stock.max_shares - realIssued;
 
             return (
               <div
@@ -218,7 +233,7 @@ export default function Market() {
                   </div>
                   <div className="bg-navy-900/60 rounded-lg p-2">
                     <p className="text-white/30">Issued</p>
-                    <p className="font-mono text-white/70">{stock.issued_shares.toLocaleString()} / {stock.max_shares.toLocaleString()}</p>
+                    <p className="font-mono text-white/70">{realIssued.toLocaleString()} / {stock.max_shares.toLocaleString()}</p>
                   </div>
                 </div>
 
