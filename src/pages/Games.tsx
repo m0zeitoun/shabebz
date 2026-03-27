@@ -7,7 +7,7 @@ type Tab = 'coinflip' | 'chicken';
 
 const TABS: { id: Tab; label: string; icon: typeof Coins }[] = [
   { id: 'coinflip', label: 'Coin Flip', icon: Coins },
-  { id: 'chicken', label: 'Chicken Road', icon: Bird },
+  { id: 'chicken', label: "Yaghi's Road", icon: Bird },
 ];
 
 export default function Games() {

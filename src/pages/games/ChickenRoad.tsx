@@ -269,7 +269,7 @@ export default function ChickenRoad() {
                 disabled={!bet || betAmount <= 0}
                 className="btn-gold w-full py-4 text-lg font-bold"
               >
-                🐔 Start Crossing!
+                🐔 Start Yaghi's Road!
               </button>
               <p className="text-white/30 text-xs text-center">Balance: {fmt(balance)}</p>
             </div>
