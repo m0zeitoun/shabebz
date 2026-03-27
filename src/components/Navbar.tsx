@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   TrendingUp, Trophy, Briefcase,
-  Settings, LogOut, ChevronDown, Zap
+  Settings, LogOut, ChevronDown, Zap, Ticket
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -42,6 +42,9 @@ export default function Navbar() {
             </NavLink>
             <NavLink to="/leaderboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               <Trophy className="w-4 h-4" /> Leaderboard
+            </NavLink>
+            <NavLink to="/lotto" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              <Ticket className="w-4 h-4" /> Lotto
             </NavLink>
             {profile?.is_admin && (
               <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
@@ -106,6 +109,9 @@ export default function Navbar() {
             </NavLink>
             <NavLink to="/leaderboard" onClick={() => setMobileOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               <Trophy className="w-4 h-4" /> Leaderboard
+            </NavLink>
+            <NavLink to="/lotto" onClick={() => setMobileOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              <Ticket className="w-4 h-4" /> Lotto
             </NavLink>
             {profile?.is_admin && (
               <NavLink to="/admin" onClick={() => setMobileOpen(false)} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>

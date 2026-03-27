@@ -6,10 +6,12 @@ import Login from './pages/Login';
 import Market from './pages/Market';
 import Portfolio from './pages/Portfolio';
 import Leaderboard from './pages/Leaderboard';
+import Lotto from './pages/Lotto';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageStocks from './pages/admin/ManageStocks';
 import ManageUsers from './pages/admin/ManageUsers';
+import ManageLotto from './pages/admin/ManageLotto';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { user, profile, loading } = useAuth();
@@ -31,11 +33,13 @@ function AppRoutes() {
         <Route path="/market" element={<Market />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/lotto" element={<Lotto />} />
 
         <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
           <Route path="stocks" element={<ManageStocks />} />
           <Route path="users" element={<ManageUsers />} />
+          <Route path="lotto" element={<ManageLotto />} />
         </Route>
       </Route>
 
