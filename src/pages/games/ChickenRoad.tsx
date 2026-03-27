@@ -3,7 +3,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
 const LANES = 8;
-const CAR_CHANCE = 0.28;
+const CAR_CHANCE = 0.40;
+const MIN_LANES_BEFORE_CASHOUT = 2;
 const MULTIPLIERS = [1.5, 2.25, 3.37, 5.06, 7.59, 11.39, 17.09, 25.63];
 
 type LaneState = 'hidden' | 'safe' | 'car';
@@ -289,16 +290,24 @@ export default function ChickenRoad() {
                   {isAnimating ? '🏃 Crossing...' : position === -1 ? '🐔 Cross!' : '→ Next Lane'}
                 </button>
                 {position >= 0 && !isAnimating && (
-                  <button
-                    onClick={cashOut}
-                    className="flex-1 py-4 rounded-2xl font-bold text-sm bg-gain/10 border border-gain/20 text-gain hover:bg-gain/20 transition-all"
-                  >
-                    Cash Out
-                    <br />
-                    <span className="font-mono text-base">
-                      {fmt(Math.floor(betAmount * MULTIPLIERS[position]))}
-                    </span>
-                  </button>
+                  position >= MIN_LANES_BEFORE_CASHOUT ? (
+                    <button
+                      onClick={cashOut}
+                      className="flex-1 py-4 rounded-2xl font-bold text-sm bg-gain/10 border border-gain/20 text-gain hover:bg-gain/20 transition-all"
+                    >
+                      Cash Out
+                      <br />
+                      <span className="font-mono text-base">
+                        {fmt(Math.floor(betAmount * MULTIPLIERS[position]))}
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="flex-1 py-4 rounded-2xl text-center bg-white/3 border border-white/8 text-white/25 text-sm">
+                      Cash Out unlocks
+                      <br />
+                      <span className="font-mono text-xs">after lane {MIN_LANES_BEFORE_CASHOUT}</span>
+                    </div>
+                  )
                 )}
               </div>
               <p className="text-white/30 text-xs text-center">Balance: {fmt(profile?.balance ?? 0)}</p>
@@ -337,7 +346,7 @@ export default function ChickenRoad() {
       {/* Risk info */}
       <div className="card p-4 flex items-center justify-between text-sm">
         <span className="text-white/30">Car chance per lane</span>
-        <span className="font-mono text-white/60">~28%</span>
+        <span className="font-mono text-white/60">~40%</span>
       </div>
     </div>
   );
