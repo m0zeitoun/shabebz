@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
-const LANES = 8;
+const LANES = 10;
 const CAR_CHANCE = 0.40;
 const MIN_LANES_BEFORE_CASHOUT = 2;
-const MULTIPLIERS = [1.5, 2.25, 3.37, 5.06, 7.59, 11.39, 17.09, 25.63];
+const MULTIPLIERS = [1.15, 1.5, 2, 2.5, 3.3, 5, 7.5, 11, 17, 25];
 
 type LaneState = 'hidden' | 'safe' | 'car';
 type GameState = 'idle' | 'playing' | 'won' | 'dead';
@@ -233,7 +233,7 @@ export default function ChickenRoad() {
                 >
                   🏆
                 </div>
-                <span className="text-white/20 text-xs font-mono">25.6×</span>
+                <span className="text-white/20 text-xs font-mono">25×</span>
               </div>
             </div>
           </div>
