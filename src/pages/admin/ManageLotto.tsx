@@ -160,7 +160,7 @@ export default function ManageLotto() {
             { label: 'Pot Size', value: fmt(totalPot), icon: Trophy },
             { label: 'Winners', value: winners.length, icon: Users },
             { label: 'Paid Out', value: fmt(totalPaidOut), icon: Trophy },
-          ].map(({ label, value, icon: Icon }) => (
+          ].map(({ label, value }) => (
             <div key={label} className="bg-navy-900 rounded-xl p-3">
               <p className="text-white/30 text-xs mb-1">{label}</p>
               <p className="font-display font-bold text-white">{value}</p>

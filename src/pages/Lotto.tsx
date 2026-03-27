@@ -242,7 +242,7 @@ export default function Lotto() {
       </div>
 
       {/* Winning Numbers (if drawn) */}
-      {round.status === 'drawn' && round.winning_numbers && (
+      {(round.status as string) === 'drawn' && round.winning_numbers && (
         <div className="card p-6 border-gold/20 bg-gold/5">
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-gold" />
@@ -262,7 +262,7 @@ export default function Lotto() {
       )}
 
       {/* Public Results — shown after draw to everyone */}
-      {round.status === 'drawn' && (
+      {(round.status as string) === 'drawn' && (
         <div className="space-y-3">
           <h2 className="font-display font-bold text-white text-lg flex items-center gap-2">
             <Trophy className="w-5 h-5 text-gold" /> Round Results
