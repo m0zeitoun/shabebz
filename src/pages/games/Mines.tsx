@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Bomb } from 'lucide-react';
 
 const GRID_SIZE = 25;
 const HOUSE_EDGE = 0.97;
