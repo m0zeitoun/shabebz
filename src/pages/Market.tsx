@@ -4,12 +4,12 @@ import type { Stock, UserStock, PriceHistory } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import BuySellModal from '../components/BuySellModal';
 import Sparkline from '../components/Sparkline';
-import { TrendingUp, TrendingDown, Search, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, Search, RefreshCw, Gift } from 'lucide-react';
 
 type ModalState = { stock: Stock; mode: 'buy' | 'sell' } | null;
 
 export default function Market() {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [holdings, setHoldings] = useState<UserStock[]>([]);
   const [histories, setHistories] = useState<Record<string, PriceHistory[]>>({});
@@ -18,6 +18,8 @@ export default function Market() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [flashMap, setFlashMap] = useState<Record<string, 'gain' | 'loss'>>({});
+  const [claiming, setClaiming] = useState(false);
+  const [claimMsg, setClaimMsg] = useState('');
 
   // Fetch real issued shares from user_stocks (sum of all shares owned per stock)
   const fetchIssuedShares = useCallback(async () => {
@@ -120,6 +122,60 @@ export default function Market() {
     fetchHoldings();
   };
 
+  // Calculate pending hourly dividend (5% per hour of total holdings value)
+  const calcPending = () => {
+    if (!profile?.last_claimed_at) return 0;
+    const hoursElapsed = (Date.now() - new Date(profile.last_claimed_at).getTime()) / 3600000;
+    const holdingsValue = holdings.reduce((sum, h) => {
+      const stock = stocks.find(s => s.id === h.stock_id);
+      return sum + (stock ? stock.current_price * h.shares_owned : 0);
+    }, 0);
+    if (holdingsValue === 0) return 0;
+    return Math.floor(hoursElapsed * 0.05 * holdingsValue * 100) / 100;
+  };
+
+  const pendingReward = calcPending();
+  const totalHoldingsValue = holdings.reduce((sum, h) => {
+    const stock = stocks.find(s => s.id === h.stock_id);
+    return sum + (stock ? stock.current_price * h.shares_owned : 0);
+  }, 0);
+  const hasShares = totalHoldingsValue > 0;
+
+  const claimDividend = async () => {
+    if (!profile || claiming) return;
+
+    // First time claiming — just set the clock, no reward
+    if (!profile.last_claimed_at) {
+      setClaiming(true);
+      await supabase.from('users').update({ last_claimed_at: new Date().toISOString() }).eq('id', profile.id);
+      await refreshProfile();
+      setClaiming(false);
+      setClaimMsg('Dividend tracking started! Come back in an hour.');
+      setTimeout(() => setClaimMsg(''), 4000);
+      return;
+    }
+
+    const reward = calcPending();
+    if (reward <= 0) {
+      setClaimMsg('Nothing to claim yet — come back in an hour!');
+      setTimeout(() => setClaimMsg(''), 3000);
+      return;
+    }
+
+    setClaiming(true);
+    const { data: fresh } = await supabase.from('users').select('balance').eq('id', profile.id).single();
+    if (fresh) {
+      await supabase.from('users').update({
+        balance: fresh.balance + reward,
+        last_claimed_at: new Date().toISOString(),
+      }).eq('id', profile.id);
+    }
+    await refreshProfile();
+    setClaiming(false);
+    setClaimMsg(`+${fmt(reward)} claimed!`);
+    setTimeout(() => setClaimMsg(''), 4000);
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -154,6 +210,28 @@ export default function Market() {
         <div>
           <h1 className="section-header">Market</h1>
           <p className="section-sub">{filtered.length} stocks listed</p>
+        </div>
+
+        {/* Dividend Claim */}
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={claimDividend}
+            disabled={claiming || !hasShares}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all border ${
+              !hasShares
+                ? 'bg-white/3 border-white/8 text-white/25 cursor-not-allowed'
+                : pendingReward > 0
+                ? 'bg-gain/10 border-gain/30 text-gain hover:bg-gain/20'
+                : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
+            }`}
+          >
+            <Gift className="w-4 h-4" />
+            {claiming ? 'Claiming...' : pendingReward > 0 ? `Claim ${fmt(pendingReward)}` : !profile?.last_claimed_at ? 'Start Earning' : 'Dividends'}
+          </button>
+          {claimMsg && <p className="text-gain text-xs font-semibold">{claimMsg}</p>}
+          {hasShares && profile?.last_claimed_at && (
+            <p className="text-white/25 text-xs">{fmt(totalHoldingsValue * 0.05)}/hr</p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">

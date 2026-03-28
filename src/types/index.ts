@@ -6,6 +6,7 @@ export interface UserProfile {
   is_admin: boolean;
   created_at: string;
   updated_at: string;
+  last_claimed_at: string | null;
 }
 
 export interface Stock {
