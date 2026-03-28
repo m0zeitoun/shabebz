@@ -183,7 +183,7 @@ export default function Mines() {
                   {isMine ? (
                     <img src="/mine-bomb.png" alt="mine" className="w-7 h-7 object-contain" />
                   ) : isGem ? (
-                    <img src="/gem-face.png" alt="gem" className="w-7 h-7 object-contain rounded-full" />
+                    <img src="/gem-face.png" alt="gem" className="w-10 h-10 object-contain rounded-full" />
                   ) : isPlaying ? (
                     <div className="w-2 h-2 rounded-full bg-white/15" />
                   ) : null}
