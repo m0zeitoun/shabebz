@@ -3,8 +3,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
 const LANES = 10;
-const CAR_CHANCE = 0.40;
-const MIN_LANES_BEFORE_CASHOUT = 2;
+const CAR_CHANCE = 0.30;
+const MIN_LANES_BEFORE_CASHOUT = 1;
 const MULTIPLIERS = [1.15, 1.5, 2, 2.5, 3.3, 5, 7.5, 11, 17, 25];
 
 type LaneState = 'hidden' | 'safe' | 'car';
@@ -346,7 +346,7 @@ export default function ChickenRoad() {
       {/* Risk info */}
       <div className="card p-4 flex items-center justify-between text-sm">
         <span className="text-white/30">Car chance per lane</span>
-        <span className="font-mono text-white/60">~40%</span>
+        <span className="font-mono text-white/60">~30%</span>
       </div>
     </div>
   );
