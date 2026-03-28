@@ -138,8 +138,11 @@ export default function Mines() {
       >
         {/* Result banner */}
         {(isDead || isWon) && (
-          <div className={`px-6 py-2.5 text-center font-display font-bold text-sm tracking-widest ${isDead ? 'bg-loss/10 text-loss' : 'bg-gain/10 text-gain'}`}>
-            {isDead ? `💥 HIT A MINE — LOST ${fmt(betAmount)}` : `💎 CASHED OUT ${cashedAt?.toFixed(2)}× — WON ${fmt(Math.floor(betAmount * (cashedAt ?? 1)))}`}
+          <div className={`px-6 py-2.5 text-center font-display font-bold text-sm tracking-widest flex items-center justify-center gap-2 ${isDead ? 'bg-loss/10 text-loss' : 'bg-gain/10 text-gain'}`}>
+            {isDead
+              ? <><img src="/mine-bomb.png" alt="mine" className="w-5 h-5 object-contain" /> HIT A MINE — LOST {fmt(betAmount)}</>
+              : <><img src="/gem-face.png" alt="hallel" className="w-6 h-6 object-contain rounded-full" /> CASHED OUT {cashedAt?.toFixed(2)}× — WON {fmt(Math.floor(betAmount * (cashedAt ?? 1)))}</>
+            }
           </div>
         )}
 
@@ -217,11 +220,11 @@ export default function Mines() {
 
               {/* Potential wins preview */}
               <div className="bg-navy-900 rounded-xl p-3">
-                <p className="text-white/30 text-xs mb-2">Potential multipliers ({mineCount} mines)</p>
+                <p className="text-white/30 text-xs mb-2">Potential multipliers ({mineCount} bombs)</p>
                 <div className="grid grid-cols-4 gap-1.5">
                   {[1, 2, 3, 5].map(r => (
                     <div key={r} className="text-center">
-                      <p className="text-white/20 text-xs">{r} gem{r > 1 ? 's' : ''}</p>
+                      <p className="text-white/20 text-xs">{r} Hallel{r > 1 ? 's' : ''}</p>
                       <p className="font-mono text-gold text-xs font-semibold">{calcMultiplier(mineCount, r).toFixed(2)}×</p>
                     </div>
                   ))}
@@ -259,7 +262,7 @@ export default function Mines() {
                 disabled={!bet || betAmount <= 0}
                 className="btn-primary w-full py-4 text-lg font-bold"
               >
-                💎 Start Game
+                Start Game
               </button>
             </div>
           )}
@@ -276,10 +279,10 @@ export default function Mines() {
                     : 'btn-gold'
                 }`}
               >
-                {revealed === 0 ? 'Reveal a gem to cash out' : `Cash Out · ${fmt(currentWin)}`}
+                {revealed === 0 ? 'Reveal a Hallel to cash out' : `Cash Out · ${fmt(currentWin)}`}
               </button>
               <div className="flex justify-between text-xs text-white/30 px-1">
-                <span>{revealed} gem{revealed !== 1 ? 's' : ''} found</span>
+                <span>{revealed} Hallel{revealed !== 1 ? 's' : ''} found</span>
                 <span>{mineCount} mines hidden</span>
               </div>
             </div>
