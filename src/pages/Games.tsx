@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Coins, Bird } from 'lucide-react';
+import { Coins, Bird, Circle } from 'lucide-react';
 import CoinFlip from './games/CoinFlip';
 import ChickenRoad from './games/ChickenRoad';
+import BlueBalls from './games/BlueBalls';
 
-type Tab = 'coinflip' | 'chicken';
+type Tab = 'coinflip' | 'chicken' | 'blueballs';
 
 const TABS: { id: Tab; label: string; icon: typeof Coins }[] = [
-  { id: 'coinflip', label: 'Coin Flip', icon: Coins },
-  { id: 'chicken', label: "Yaghi's Road", icon: Bird },
+  { id: 'coinflip',  label: 'Coin Flip',    icon: Coins  },
+  { id: 'chicken',   label: "Yaghi's Road",  icon: Bird   },
+  { id: 'blueballs', label: 'Blue Balls',    icon: Circle },
 ];
 
 export default function Games() {
@@ -37,8 +39,9 @@ export default function Games() {
         ))}
       </div>
 
-      {tab === 'coinflip' && <CoinFlip />}
-      {tab === 'chicken' && <ChickenRoad />}
+      {tab === 'coinflip'  && <CoinFlip />}
+      {tab === 'chicken'   && <ChickenRoad />}
+      {tab === 'blueballs' && <BlueBalls />}
     </div>
   );
 }
