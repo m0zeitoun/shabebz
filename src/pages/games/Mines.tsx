@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Bomb, Diamond } from 'lucide-react';
+import { Bomb } from 'lucide-react';
 
 const GRID_SIZE = 25;
 const HOUSE_EDGE = 0.97;
@@ -182,9 +182,9 @@ export default function Mines() {
                   }`}
                 >
                   {isMine ? (
-                    <Bomb className="w-5 h-5 text-loss" />
+                    <img src="/mine-bomb.png" alt="mine" className="w-7 h-7 object-contain" />
                   ) : isGem ? (
-                    <Diamond className="w-5 h-5 text-gain" />
+                    <img src="/gem-face.png" alt="gem" className="w-7 h-7 object-contain rounded-full" />
                   ) : isPlaying ? (
                     <div className="w-2 h-2 rounded-full bg-white/15" />
                   ) : null}
