@@ -3,9 +3,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
 const LANES = 9;
-const CAR_CHANCE = 0.667;
 const MIN_LANES_BEFORE_CASHOUT = 1;
 const MULTIPLIERS = [1.15, 1.5, 2.5, 3.3, 5, 7.5, 11, 17, 25];
+// Car chance per lane (1 - survival chance)
+const CAR_CHANCES = [0.50, 0.60, 0.67, 0.70, 0.78, 0.80, 0.82, 0.85, 0.89];
 
 type LaneState = 'hidden' | 'safe' | 'car';
 type GameState = 'idle' | 'playing' | 'won' | 'dead';
@@ -27,9 +28,7 @@ export default function ChickenRoad() {
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
   const generateRoad = (): boolean[] => {
-    const r = Array.from({ length: LANES }, () => Math.random() < CAR_CHANCE);
-    if (!r.some(Boolean)) r[Math.floor(Math.random() * LANES)] = true;
-    return r;
+    return Array.from({ length: LANES }, (_, i) => Math.random() < CAR_CHANCES[i]);
   };
 
   const startGame = async () => {
@@ -337,8 +336,8 @@ export default function ChickenRoad() {
 
       {/* Risk info */}
       <div className="card p-4 flex items-center justify-between text-sm">
-        <span className="text-white/30">Car chance per lane</span>
-        <span className="font-mono text-white/60">~33%</span>
+        <span className="text-white/30">Survival chance</span>
+        <span className="font-mono text-white/60">50% → 11%</span>
       </div>
     </div>
   );
