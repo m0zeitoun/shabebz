@@ -6,7 +6,7 @@ const LANES = 9;
 const MIN_LANES_BEFORE_CASHOUT = 1;
 const MULTIPLIERS = [1.15, 1.5, 2.5, 3.3, 5, 7.5, 11, 17, 25];
 // Car chance per lane (1 - survival chance)
-const CAR_CHANCES = [0.50, 0.60, 0.67, 0.70, 0.78, 0.80, 0.82, 0.85, 0.89];
+const CAR_CHANCES = [0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70];
 
 type LaneState = 'hidden' | 'safe' | 'car';
 type GameState = 'idle' | 'playing' | 'won' | 'dead';
