@@ -20,6 +20,7 @@ export default function Market() {
   const [flashMap, setFlashMap] = useState<Record<string, 'gain' | 'loss'>>({});
   const [claiming, setClaiming] = useState(false);
   const [claimMsg, setClaimMsg] = useState('');
+  const [dividendRate, setDividendRate] = useState(0.05);
 
   // Fetch real issued shares from user_stocks (sum of all shares owned per stock)
   const fetchIssuedShares = useCallback(async () => {
@@ -85,6 +86,9 @@ export default function Market() {
       setLoading(true);
       await fetchStocks();
       await fetchHoldings();
+      // Fetch dividend rate from settings
+      const { data } = await supabase.from('settings').select('value').eq('key', 'dividend_rate').single();
+      if (data) setDividendRate(parseFloat(data.value));
       setLoading(false);
     };
     init();
@@ -131,7 +135,7 @@ export default function Market() {
       return sum + (stock ? stock.current_price * h.shares_owned : 0);
     }, 0);
     if (holdingsValue === 0) return 0;
-    return Math.floor(hoursElapsed * 0.05 * holdingsValue * 100) / 100;
+    return Math.floor(hoursElapsed * dividendRate * holdingsValue * 100) / 100;
   };
 
   const pendingReward = calcPending();
@@ -230,7 +234,7 @@ export default function Market() {
           </button>
           {claimMsg && <p className="text-gain text-xs font-semibold">{claimMsg}</p>}
           {hasShares && profile?.last_claimed_at && (
-            <p className="text-white/25 text-xs">{fmt(totalHoldingsValue * 0.05)}/hr</p>
+            <p className="text-white/25 text-xs">{fmt(totalHoldingsValue * dividendRate)}/hr</p>
           )}
         </div>
         <div className="flex items-center gap-2">

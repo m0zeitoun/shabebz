@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Users, Ticket } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Users, Ticket, Settings } from 'lucide-react';
 
 export default function AdminLayout() {
   return (
@@ -16,6 +16,7 @@ export default function AdminLayout() {
           { to: '/admin/stocks', label: 'Stocks', icon: TrendingUp },
           { to: '/admin/users', label: 'Users', icon: Users },
           { to: '/admin/lotto', label: 'Lotto', icon: Ticket },
+          { to: '/admin/settings', label: 'Settings', icon: Settings },
         ].map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
