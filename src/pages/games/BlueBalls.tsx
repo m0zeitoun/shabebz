@@ -157,7 +157,7 @@ export default function BlueBalls() {
           >
             {isDead
               ? `💥 BUSTED — LOST ${fmt(betAmount)}`
-              : `<img src="/egg.png" alt="egg" className="w-6 h-6 object-contain" /> CASHED OUT ${cashedAt?.toFixed(2)}× — WON ${fmt(Math.floor(betAmount * (cashedAt ?? 1)))}`}
+              : `✅ CASHED OUT ${cashedAt?.toFixed(2)}× — WON ${fmt(Math.floor(betAmount * (cashedAt ?? 1)))}`}
           </div>
         )}
 
@@ -251,7 +251,9 @@ export default function BlueBalls() {
                                   : 'bg-white/2 border-white/5'
                               }`}
                             >
-                              {showResult ? (isSafe ? '<img src="/egg.png" alt="egg" className="w-6 h-6 object-contain" />' : '💥') : isActive ? '<img src="/egg.png" alt="egg" className="w-6 h-6 object-contain" />' : ''}
+                              {showResult
+                                ? (isSafe ? <img src="/egg.png" alt="egg" className="w-6 h-6 object-contain" /> : '💥')
+                                : isActive ? <img src="/egg.png" alt="egg" className="w-6 h-6 object-contain opacity-30" /> : ''}
                             </button>
                           );
                         })}
@@ -300,7 +302,7 @@ export default function BlueBalls() {
                 disabled={!bet || betAmount <= 0}
                 className="w-full py-4 rounded-2xl font-display font-bold text-lg bg-blue-500/20 border border-blue-400/30 text-blue-200 hover:bg-blue-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <img src="/egg.png" alt="egg" className="w-6 h-6 object-contain" /> Start Blue Balls!
+                🥚 Start Blue Balls!
               </button>
             </div>
           )}
