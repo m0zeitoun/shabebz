@@ -111,7 +111,7 @@ export default function Market() {
     s.ticker.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalMarketCap = stocks.reduce((sum, s) => sum + s.current_price * s.issued_shares, 0);
+  const totalMarketCap = stocks.reduce((sum, s) => sum + s.current_price * (issuedMap[s.id] ?? 0), 0);
   const gainers = stocks.filter(s => pctChange(s) > 0).length;
   const losers = stocks.filter(s => pctChange(s) < 0).length;
 
