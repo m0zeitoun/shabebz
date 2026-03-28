@@ -205,19 +205,6 @@ export default function ChickenRoad() {
                     >
                       {state === 'car' ? '🚗' : state === 'safe' ? '✅' : isNext ? '❓' : '🌫️'}
                     </div>
-                    <span
-                      className={`text-xs font-mono font-semibold transition-colors ${
-                        isCurrent
-                          ? 'text-gold'
-                          : state === 'safe'
-                          ? 'text-gain/50'
-                          : isNext
-                          ? 'text-white/50'
-                          : 'text-white/20'
-                      }`}
-                    >
-                      {mult}×
-                    </span>
                   </div>
                 );
               })}
