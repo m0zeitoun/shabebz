@@ -22,7 +22,7 @@ interface LotteryTicket {
   user?: { username: string };
 }
 
-const TICKET_COST = 50;
+const TICKET_COST = 20;
 const PRIZES: Record<number, number> = { 3: 150, 4: 400, 5: 1000, 6: 2000 };
 
 export default function Lotto() {
