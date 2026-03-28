@@ -226,14 +226,18 @@ export default function Market() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
+                <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
                   <div className="bg-navy-900/60 rounded-lg p-2">
                     <p className="text-white/30">Available</p>
-                    <p className="font-mono text-white/70">{available.toLocaleString()} shares</p>
+                    <p className="font-mono text-white/70">{available.toLocaleString()}</p>
                   </div>
                   <div className="bg-navy-900/60 rounded-lg p-2">
                     <p className="text-white/30">Issued</p>
-                    <p className="font-mono text-white/70">{realIssued.toLocaleString()} / {stock.max_shares.toLocaleString()}</p>
+                    <p className="font-mono text-white/70">{realIssued} / {stock.max_shares.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-navy-900/60 rounded-lg p-2">
+                    <p className="text-white/30">Mkt Cap</p>
+                    <p className="font-mono text-gold">{fmt(realIssued * stock.current_price)}</p>
                   </div>
                 </div>
 
@@ -242,7 +246,7 @@ export default function Market() {
                   <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-gain to-cyan-400 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (stock.issued_shares / stock.max_shares) * 100)}%` }}
+                      style={{ width: `${Math.min(100, (realIssued / stock.max_shares) * 100)}%` }}
                     />
                   </div>
                 </div>
