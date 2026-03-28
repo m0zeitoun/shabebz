@@ -230,6 +230,7 @@ export default function Market() {
                   <div className="bg-navy-900/60 rounded-lg p-2">
                     <p className="text-white/30">Available</p>
                     <p className="font-mono text-white/70">{available.toLocaleString()}</p>
+                    <p className="font-mono text-white/40 text-xs">{fmt(available * stock.current_price)}</p>
                   </div>
                   <div className="bg-navy-900/60 rounded-lg p-2">
                     <p className="text-white/30">Issued</p>
