@@ -163,7 +163,7 @@ export default function Lotto() {
           <h1 className="section-header flex items-center gap-2">
             <Ticket className="w-6 h-6 text-gold" /> Lotto
           </h1>
-          <p className="section-sub">Pick 6 numbers · $50 per ticket · Win up to $2,000</p>
+          <p className="section-sub">Pick 6 numbers · $20 per ticket · Win up to $5,000</p>
         </div>
 
         {/* Show results if round was drawn */}
@@ -223,7 +223,7 @@ export default function Lotto() {
           <h1 className="section-header flex items-center gap-2">
             <Ticket className="w-6 h-6 text-gold" /> Lotto
           </h1>
-          <p className="section-sub">Pick 6 numbers · $50 per ticket · Win up to $2,000</p>
+          <p className="section-sub">Pick 6 numbers · $20 per ticket · Win up to $5,000</p>
         </div>
         <div className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 ${isOpen ? 'bg-gain/10 text-gain border border-gain/20' : 'bg-white/5 text-white/40 border border-white/10'}`}>
           {isOpen ? <><Clock className="w-3 h-3" /> OPEN</> : <><CheckCircle className="w-3 h-3" /> DRAWN</>}
