@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
-const LANES = 10;
+const LANES = 9;
 const CAR_CHANCE = 0.25;
 const MIN_LANES_BEFORE_CASHOUT = 1;
-const MULTIPLIERS = [1.15, 1.5, 2, 2.5, 3.3, 5, 7.5, 11, 17, 25];
+const MULTIPLIERS = [1.15, 1.5, 2.5, 3.3, 5, 7.5, 11, 17, 25];
 
 type LaneState = 'hidden' | 'safe' | 'car';
 type GameState = 'idle' | 'playing' | 'won' | 'dead';
@@ -205,6 +205,11 @@ export default function ChickenRoad() {
                     >
                       {state === 'car' ? '🚗' : state === 'safe' ? '✅' : isNext ? '❓' : '🌫️'}
                     </div>
+                    <span className={`text-xs font-mono font-semibold transition-colors ${
+                      isCurrent ? 'text-gold' : state === 'safe' ? 'text-gain/50' : isNext ? 'text-white/50' : 'text-white/20'
+                    }`}>
+                      {mult}×
+                    </span>
                   </div>
                 );
               })}
