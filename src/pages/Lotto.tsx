@@ -157,6 +157,8 @@ export default function Lotto() {
   }
 
   if (!round || round.status === 'drawn') {
+    const myTotalWon = myTickets.reduce((s, t) => s + (t.prize ?? 0), 0);
+
     return (
       <div className="space-y-6 animate-fade-in">
         <div>
@@ -166,41 +168,118 @@ export default function Lotto() {
           <p className="section-sub">Pick 6 numbers · $20 per ticket · Win up to $5,000</p>
         </div>
 
-        {/* Show results if round was drawn */}
         {round?.status === 'drawn' && round.winning_numbers && (
-          <div className="card p-6 border-gold/20 bg-gold/5">
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="w-5 h-5 text-gold" />
-              <h2 className="font-display font-bold text-white">Last Draw — Winning Numbers</h2>
+          <>
+            {/* Winning Numbers */}
+            <div className="card p-6 border-gold/20 bg-gold/5">
+              <div className="flex items-center gap-2 mb-4">
+                <Trophy className="w-5 h-5 text-gold" />
+                <h2 className="font-display font-bold text-white">Last Draw — Winning Numbers</h2>
+                <span className="text-white/30 text-xs ml-auto">
+                  {round.drawn_at ? new Date(round.drawn_at).toLocaleString() : ''}
+                </span>
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                {round.winning_numbers.sort((a, b) => a - b).map(n => (
+                  <div key={n} className="w-12 h-12 rounded-full rank-gold flex items-center justify-center font-display font-bold text-navy-900 text-lg shadow-lg">
+                    {n}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex gap-3 flex-wrap mb-5">
-              {round.winning_numbers.sort((a, b) => a - b).map(n => (
-                <div key={n} className="w-12 h-12 rounded-full rank-gold flex items-center justify-center font-display font-bold text-navy-900 text-lg shadow-lg">
-                  {n}
-                </div>
-              ))}
-            </div>
-            {allTickets.filter(t => (t.prize ?? 0) > 0).length > 0 && (
-              <div className="space-y-2">
-                <p className="text-white/40 text-sm font-medium mb-3">Winners</p>
-                {allTickets.filter(t => (t.prize ?? 0) > 0).map((ticket, idx) => {
-                  const username = Array.isArray(ticket.user) ? ticket.user[0]?.username : ticket.user?.username ?? '?';
-                  const isMe = ticket.user_id === profile?.id;
-                  const rankColors = ['rank-gold', 'rank-silver', 'rank-bronze'];
+
+            {/* Winner Breakdown */}
+            <div className="card p-5">
+              <h2 className="font-display font-bold text-white mb-4 flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-gold" /> Winners Breakdown
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[3, 4, 5, 6].map(matchCount => {
+                  const count = allTickets.filter(t => (t.matches ?? 0) === matchCount).length;
                   return (
-                    <div key={ticket.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? 'bg-gain/10 border border-gain/20' : 'bg-white/3'}`}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${rankColors[idx] ?? 'bg-white/10 text-white/50'}`}>{idx + 1}</div>
-                      <div className="flex-1">
-                        <p className="font-display font-semibold text-white text-sm">{username} {isMe && <span className="text-gain text-xs">(you)</span>}</p>
-                        <p className="text-white/30 text-xs">{ticket.matches} numbers matched</p>
-                      </div>
-                      <p className="text-gold font-display font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(ticket.prize)}</p>
+                    <div key={matchCount} className={`rounded-xl p-3 text-center border ${count > 0 ? 'bg-gold/8 border-gold/25' : 'bg-white/2 border-white/6'}`}>
+                      <p className="text-white/40 text-xs mb-1">{matchCount} matches</p>
+                      <p className={`font-display font-bold text-2xl ${count > 0 ? 'text-gold' : 'text-white/20'}`}>{count}</p>
+                      <p className="text-white/30 text-xs mt-1">winner{count !== 1 ? 's' : ''}</p>
+                      <p className="text-white/20 text-xs font-mono">{fmt(PRIZES[matchCount])} each</p>
                     </div>
                   );
                 })}
               </div>
+            </div>
+
+            {/* My Tickets This Round */}
+            {myTickets.length > 0 && (
+              <div className="card p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-display font-bold text-white flex items-center gap-2">
+                    <Ticket className="w-4 h-4 text-white/40" /> My Tickets
+                    <span className="text-white/30 text-sm font-normal">({myTickets.length})</span>
+                  </h2>
+                  {myTotalWon > 0 && (
+                    <span className="gain-badge font-bold">Won {fmt(myTotalWon)}</span>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  {myTickets.map((ticket, idx) => {
+                    const matchCount = ticket.numbers.filter(n => round.winning_numbers!.includes(n)).length;
+                    const prize = PRIZES[matchCount] ?? 0;
+                    const isWinner = prize > 0;
+                    return (
+                      <div key={ticket.id} className={`rounded-xl p-4 border transition-all ${isWinner ? 'bg-gold/8 border-gold/25' : 'bg-white/2 border-white/6'}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-white/40 text-xs">Ticket #{idx + 1}</span>
+                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                            isWinner ? 'bg-gold/20 text-gold' : matchCount > 0 ? 'bg-white/10 text-white/50' : 'bg-white/5 text-white/25'
+                          }`}>
+                            {matchCount} match{matchCount !== 1 ? 'es' : ''}{isWinner ? ` · ${fmt(prize)}` : ''}
+                          </span>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {ticket.numbers.map(n => {
+                            const isMatch = round.winning_numbers?.includes(n);
+                            return (
+                              <div key={n} className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-display font-bold ${
+                                isMatch ? 'rank-gold text-navy-900 shadow-md' : 'bg-white/5 text-white/30'
+                              }`}>
+                                {n}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
-          </div>
+
+            {/* Full Winners List */}
+            {allTickets.filter(t => (t.prize ?? 0) > 0).length > 0 && (
+              <div className="card p-5">
+                <h2 className="font-display font-bold text-white mb-4 flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-gold" /> All Winners
+                </h2>
+                <div className="space-y-2">
+                  {allTickets.filter(t => (t.prize ?? 0) > 0).map((ticket, idx) => {
+                    const username = Array.isArray(ticket.user) ? ticket.user[0]?.username : ticket.user?.username ?? '?';
+                    const isMe = ticket.user_id === profile?.id;
+                    const rankColors = ['rank-gold', 'rank-silver', 'rank-bronze'];
+                    return (
+                      <div key={ticket.id} className={`flex items-center gap-3 p-3 rounded-xl ${isMe ? 'bg-gain/10 border border-gain/20' : 'bg-white/3'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${rankColors[idx] ?? 'bg-white/10 text-white/50'}`}>{idx + 1}</div>
+                        <div className="flex-1">
+                          <p className="font-display font-semibold text-white text-sm">{username} {isMe && <span className="text-gain text-xs">(you)</span>}</p>
+                          <p className="text-white/30 text-xs">{ticket.matches} numbers matched</p>
+                        </div>
+                        <p className="text-gold font-display font-bold">{fmt(ticket.prize)}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <div className="card p-12 text-center">
