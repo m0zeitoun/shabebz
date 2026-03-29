@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Send, Zap, Ticket, Trophy, Gamepad2, Gift, Sparkles, Users } from 'lucide-react';
+import { Bell, Zap, Ticket, Trophy, Gamepad2, Gift, Sparkles, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const ONESIGNAL_APP_ID = '9cbe5bc4-14f3-4311-98d9-5950a6f160ba';
