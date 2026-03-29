@@ -13,6 +13,7 @@ import ManageStocks from './pages/admin/ManageStocks';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageLotto from './pages/admin/ManageLotto';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminNotifications from './pages/admin/AdminNotifications';
 import Games from './pages/Games';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
@@ -44,6 +45,7 @@ function AppRoutes() {
           <Route path="users" element={<ManageUsers />} />
           <Route path="lotto" element={<ManageLotto />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="notifications" element={<AdminNotifications />} />
         </Route>
       </Route>
 
