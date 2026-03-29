@@ -1,82 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Bell, Zap, Ticket, Trophy, Gamepad2, Gift, Sparkles, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-const ONESIGNAL_APP_ID = '9cbe5bc4-14f3-4311-98d9-5950a6f160ba';
-
 const TEMPLATES = [
-  {
-    icon: Ticket,
-    label: 'New Lotto Round',
-    title: '🎟️ New Lotto Round is Open!',
-    message: 'A new lottery round just opened — grab your tickets now and win up to $5,000! 🤑',
-    color: 'text-gold',
-  },
-  {
-    icon: Trophy,
-    label: 'Lotto Results',
-    title: '🏆 Lotto Results Are In!',
-    message: "The winning numbers have been drawn — check if you're a winner! 🎉",
-    color: 'text-gold',
-  },
-  {
-    icon: Gamepad2,
-    label: 'New Game',
-    title: '🎮 New Game Available!',
-    message: "A brand new game just dropped on Shabebz — come play and win big! 🔥",
-    color: 'text-gain',
-  },
-  {
-    icon: Gift,
-    label: 'Dividends Ready',
-    title: '💰 Your Dividends Are Waiting!',
-    message: 'You have unclaimed dividends from your stock holdings — log in and collect! 📈',
-    color: 'text-gain',
-  },
-  {
-    icon: Zap,
-    label: 'Market Alert',
-    title: '📊 Market is Moving!',
-    message: 'Big changes happening in the market right now — check your portfolio! 🚀',
-    color: 'text-loss',
-  },
-  {
-    icon: Sparkles,
-    label: 'Custom',
-    title: '',
-    message: '',
-    color: 'text-white/50',
-  },
+  { icon: Ticket, label: 'New Lotto Round', title: '🎟️ New Lotto Round is Open!', message: 'A new lottery round just opened — grab your tickets now and win up to $5,000! 🤑', color: 'text-gold' },
+  { icon: Trophy, label: 'Lotto Results', title: '🏆 Lotto Results Are In!', message: "The winning numbers have been drawn — check if you're a winner! 🎉", color: 'text-gold' },
+  { icon: Gamepad2, label: 'New Game', title: '🎮 New Game Available!', message: "A brand new game just dropped on Shabebz — come play and win big! 🔥", color: 'text-gain' },
+  { icon: Gift, label: 'Dividends Ready', title: '💰 Your Dividends Are Waiting!', message: 'You have unclaimed dividends from your stock holdings — log in and collect! 📈', color: 'text-gain' },
+  { icon: Zap, label: 'Market Alert', title: '📊 Market is Moving!', message: 'Big changes happening in the market right now — check your portfolio! 🚀', color: 'text-loss' },
+  { icon: Sparkles, label: 'Custom', title: '', message: '', color: 'text-white/50' },
 ];
 
 export default function AdminNotifications() {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [showKeyInput, setShowKeyInput] = useState(false);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [sentCount, setSentCount] = useState(0);
-
-  useEffect(() => {
-    supabase
-      .from('settings')
-      .select('value')
-      .eq('key', 'onesignal_rest_key')
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.value) setApiKey(data.value);
-      });
-  }, []);
-
-  const saveApiKey = async () => {
-    await supabase
-      .from('settings')
-      .upsert({ key: 'onesignal_rest_key', value: apiKey });
-    setShowKeyInput(false);
-    setResult({ ok: true, text: 'API key saved!' });
-    setTimeout(() => setResult(null), 3000);
-  };
 
   const applyTemplate = (tpl: typeof TEMPLATES[0]) => {
     setTitle(tpl.title);
@@ -89,62 +29,25 @@ export default function AdminNotifications() {
       setResult({ ok: false, text: 'Please fill in title and message.' });
       return;
     }
-    if (!apiKey) {
-      setShowKeyInput(true);
-      setResult({ ok: false, text: 'Please set your OneSignal REST API key first.' });
-      return;
-    }
-
     setSending(true);
     setResult(null);
 
     try {
-      // First: deactivate old announcements
-      await supabase
-        .from('announcements')
-        .update({ is_active: false })
-        .eq('is_active', true);
+      // Deactivate old announcements
+      await supabase.from('announcements').update({ is_active: false }).eq('is_active', true);
 
-      // Save new announcement to Supabase (shows banner to ALL users)
+      // Insert new announcement
       const { error: dbErr } = await supabase
         .from('announcements')
         .insert({ title, message, is_active: true });
 
       if (dbErr) {
-        setResult({ ok: false, text: 'Failed to save: ' + dbErr.message });
+        setResult({ ok: false, text: 'Failed: ' + dbErr.message });
         return;
       }
 
       setSentCount(prev => prev + 1);
-      let resultText = 'Banner sent to all users! ✅';
-
-      // Also try OneSignal push if key is configured
-      if (apiKey) {
-        try {
-          const res = await fetch('https://onesignal.com/api/v1/notifications', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Basic ${apiKey}`,
-            },
-            body: JSON.stringify({
-              app_id: ONESIGNAL_APP_ID,
-              included_segments: ['All'],
-              headings: { en: title },
-              contents: { en: message },
-            }),
-          });
-          const json = await res.json();
-          if (res.ok && !json.errors) {
-            const recipients = json.recipients ?? 0;
-            resultText = `Banner sent to all users + push to ${recipients} subscriber${recipients !== 1 ? 's' : ''}! ✅`;
-          }
-        } catch {
-          // Push failed silently, banner still sent
-        }
-      }
-
-      setResult({ ok: true, text: resultText });
+      setResult({ ok: true, text: 'Banner sent to all users! ✅' });
       setTitle('');
       setMessage('');
     } catch {
@@ -159,9 +62,9 @@ export default function AdminNotifications() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display font-bold text-white text-lg flex items-center gap-2">
-            <Bell className="w-5 h-5 text-gold" /> Push Notifications
+            <Bell className="w-5 h-5 text-gold" /> Announcements
           </h2>
-          <p className="text-white/40 text-sm mt-0.5">Send announcements to all subscribed users</p>
+          <p className="text-white/40 text-sm mt-0.5">Send a banner to all users instantly</p>
         </div>
         {sentCount > 0 && (
           <span className="text-white/30 text-xs font-mono">{sentCount} sent this session</span>
@@ -217,7 +120,6 @@ export default function AdminNotifications() {
           <p className="text-white/20 text-xs mt-1 text-right">{message.length}/300</p>
         </div>
 
-        {/* Preview */}
         {(title || message) && (
           <div className="bg-navy-900 rounded-xl p-4 border border-white/8">
             <p className="text-white/30 text-xs mb-2 uppercase tracking-widest font-mono">Preview</p>
@@ -260,47 +162,6 @@ export default function AdminNotifications() {
             </>
           )}
         </button>
-      </div>
-
-      {/* API Key Config */}
-      <div className="card p-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-white/40 text-xs uppercase tracking-widest font-mono">OneSignal REST API Key</p>
-          <button
-            onClick={() => setShowKeyInput(v => !v)}
-            className="text-xs text-white/30 hover:text-white/60 transition-colors"
-          >
-            {showKeyInput ? 'Hide' : apiKey ? 'Change' : 'Set Key'}
-          </button>
-        </div>
-
-        {!showKeyInput && (
-          <p className="text-white/25 text-xs font-mono">
-            {apiKey ? '••••••••••••••••••••' + apiKey.slice(-6) : 'Not configured — click "Set Key" above'}
-          </p>
-        )}
-
-        {showKeyInput && (
-          <div className="space-y-2">
-            <input
-              type="password"
-              value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
-              placeholder="Paste your OneSignal REST API key"
-              className="w-full bg-navy-900 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gain/40 text-sm font-mono"
-            />
-            <p className="text-white/25 text-xs">
-              Find it in OneSignal Dashboard → Your App → Settings → Keys & IDs → REST API Key
-            </p>
-            <button
-              onClick={saveApiKey}
-              disabled={!apiKey.trim()}
-              className="btn-primary w-full py-2.5 text-sm font-bold"
-            >
-              Save Key
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
