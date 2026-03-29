@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Send, Zap, Ticket, Trophy, Gamepad2, Gift, Sparkles } from 'lucide-react';
+import { Bell, Send, Zap, Ticket, Trophy, Gamepad2, Gift, Sparkles, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const ONESIGNAL_APP_ID = '9cbe5bc4-14f3-4311-98d9-5950a6f160ba';
@@ -99,32 +99,54 @@ export default function AdminNotifications() {
     setResult(null);
 
     try {
-      const res = await fetch('https://onesignal.com/api/v1/notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${apiKey}`,
-        },
-        body: JSON.stringify({
-          app_id: ONESIGNAL_APP_ID,
-          included_segments: ['All'],
-          headings: { en: title },
-          contents: { en: message },
-        }),
-      });
+      // First: deactivate old announcements
+      await supabase
+        .from('announcements')
+        .update({ is_active: false })
+        .eq('is_active', true);
 
-      const json = await res.json();
+      // Save new announcement to Supabase (shows banner to ALL users)
+      const { error: dbErr } = await supabase
+        .from('announcements')
+        .insert({ title, message, is_active: true });
 
-      if (!res.ok || json.errors) {
-        const errMsg = json.errors?.[0] ?? `Error ${res.status}`;
-        setResult({ ok: false, text: `Failed: ${errMsg}` });
-      } else {
-        const recipients = json.recipients ?? 0;
-        setSentCount(prev => prev + 1);
-        setResult({ ok: true, text: `Sent to ${recipients} subscriber${recipients !== 1 ? 's' : ''}! ✅` });
-        setTitle('');
-        setMessage('');
+      if (dbErr) {
+        setResult({ ok: false, text: 'Failed to save: ' + dbErr.message });
+        return;
       }
+
+      setSentCount(prev => prev + 1);
+      let resultText = 'Banner sent to all users! ✅';
+
+      // Also try OneSignal push if key is configured
+      if (apiKey) {
+        try {
+          const res = await fetch('https://onesignal.com/api/v1/notifications', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Basic ${apiKey}`,
+            },
+            body: JSON.stringify({
+              app_id: ONESIGNAL_APP_ID,
+              included_segments: ['All'],
+              headings: { en: title },
+              contents: { en: message },
+            }),
+          });
+          const json = await res.json();
+          if (res.ok && !json.errors) {
+            const recipients = json.recipients ?? 0;
+            resultText = `Banner sent to all users + push to ${recipients} subscriber${recipients !== 1 ? 's' : ''}! ✅`;
+          }
+        } catch {
+          // Push failed silently, banner still sent
+        }
+      }
+
+      setResult({ ok: true, text: resultText });
+      setTitle('');
+      setMessage('');
     } catch {
       setResult({ ok: false, text: 'Network error — check your connection.' });
     } finally {
@@ -233,7 +255,7 @@ export default function AdminNotifications() {
             </>
           ) : (
             <>
-              <Send className="w-4 h-4" />
+              <Users className="w-4 h-4" />
               Send to All Users
             </>
           )}
